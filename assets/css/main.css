@@ -1,8 +1,8 @@
 @import url(fontawesome-all.min.css);
 @import 'https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400';
-@font-face { font-family: Noto; src: url('/html5up-stellar/assets/font/NotoSansCJKkr-hinted/NotoSansCJKkr-Bold.otf'); } 
-@font-face { font-family: Noto2; src: url('/html5up-stellar/assets/font/NotoSansCJKkr-hinted/NotoSansCJKkr-Regular.otf'); } 
-@font-face { font-family: D2; src: url('/html5up-stellar/assets/font/D2Coding-Ver1.3.2-20180524.ttf'); } 
+@font-face { font-family: Noto; src: url('../font/NotoSansCJKkr-hinted/NotoSansCJKkr-Bold.otf'); } 
+@font-face { font-family: Noto2; src: url('../font/NotoSansCJKkr-hinted/NotoSansCJKkr-Regular.otf'); } 
+@font-face { font-family: D2; src: url('../font/D2Coding-Ver1.3.2-20180524.ttf'); } 
 
 /*
 	Stellar by HTML5 UP
