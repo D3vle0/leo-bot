@@ -3,7 +3,7 @@ const bot = new Discord.Client();
 const request = require('request');
 const cheerio = require('cheerio');
 
-const token = 'NjY1OTg1ODg3NjkxMzQxODI2.XiKH3g.d6wcjeuTSVLW3p_MS2fF4hLA7Dw';
+const token = process.env.arcadia;
 const PREFIX = '!';
 bot.on('ready', () =>{
     console.log('Logged in!');
