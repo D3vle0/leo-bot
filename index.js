@@ -3,6 +3,7 @@ const bot = new Discord.Client();
 const request = require('request');
 const cheerio = require('cheerio');
 
+
 const PREFIX = '!';
 bot.on('ready', () =>{
     console.log('Logged in!');
@@ -158,7 +159,9 @@ bot.on('message', message=>{
             else
                 message.channel.send('0~24 사이의 값을 입력해주세요.');
         break;
-            
+        case '버전':
+            message.channel.send('1.0');
+            break;
 }
 
 
@@ -172,27 +175,8 @@ bot.on('guildMemberAdd', member =>{
 
 bot.on('message', msg=>{
     if(msg.content === '!help' || msg.content === '리오야 도움'){
-        msg.channel.send("```cs\n#리오봇 도움말\n'리오야 도움' - 간단 도움말 표시 (느낌표 없음)\n'!hello' - 당신에게 인사를 합니다.\n'!한강' - 현재 한강 수온 표시\n'!날씨' - 현재 기온과 날씨 표시\n'!웹페이지' - 개발자의 웹페이지\n'!개발자' - 개발자 정보 표시\n'!앙빌' - 앙빌과 관련된 도움말을 표시\n'!윤태' - 윤태와 관련된 도움말을 표시\n'!낙타' - 낙타에 관련된 도움말 표시\n'!희수' - 희수와 관련된 도움말 표시\n'!업데이트' - 나중에 추가할 사항 표시'```");
+        msg.channel.send("```cs\n#리오봇 도움말\n'리오야 도움' - 간단 도움말 표시 (느낌표 없음)\n'!hello' - 당신에게 인사를 합니다.\n'!한강' - 현재 한강 수온 표시\n'!날씨', '!기온' - 현재 기온과 날씨 표시\n'!웹페이지' - 개발자의 웹페이지\n'!개발자' - 개발자 정보 표시\n'!비트코인', '!가상화폐' - 대표 가상화폐 4종 현재 시세 표시\n'!일출', '!일몰' - 일출, 일몰 시간 표시\n'!국밥' - 입력한 금액이 몇 국밥인지 확인\n'!버전' - 현재 버전 표시```");
     }
 })
 
-bot.on('message', msg=>{
-    if(msg.content === '..대치'){
-        msg.channel.send('얘들아 나 대치 갔다올게\n서버는 생존 여부는 몰라!');
-    }
-})
-
-bot.on('message', msg=>{
-    if(msg.content === '..공부'){
-        msg.channel.send('얘들아 나 공부중이야\n서버는 살아있을거야!');
-    }
-})
-
-bot.on('message', msg=>{
-    if(msg.content === '..밥'){
-        msg.channel.send('관리자 밥먹는중...');
-    }
-})
-
-
-bot.login(process.env.BOT_TOKEN);
+bot.login(token);
