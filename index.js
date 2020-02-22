@@ -3,7 +3,6 @@ const bot = new Discord.Client();
 const request = require('request');
 const cheerio = require('cheerio');
 
-const token = process.env.arcadia;
 const PREFIX = '!';
 bot.on('ready', () =>{
     console.log('Logged in!');
@@ -196,4 +195,4 @@ bot.on('message', msg=>{
 })
 
 
-bot.login(token);
+bot.login(process.env.BOT_TOKEN);
