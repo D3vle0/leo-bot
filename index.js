@@ -3,7 +3,7 @@ const bot = new Discord.Client();
 const request = require('request');
 const cheerio = require('cheerio');
 
-
+const token = '';
 const PREFIX = '!';
 bot.on('ready', () =>{
     console.log('Logged in!');
@@ -179,4 +179,4 @@ bot.on('message', msg=>{
     }
 })
 
-bot.login(process.env.BOT_TOKEN);
+bot.login(token);
