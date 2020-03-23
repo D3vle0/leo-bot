@@ -7,7 +7,7 @@ const queue = new Map();
 
 
 //초기 설정값
-const token = 'NjgxMzI5Nzg0NzY4NTYxMTYy.XlaWhw.lqsuqcHmBtvj-zkjl5nu8dxZYfs';
+const token = '';
 const prefix = '!';
 const VERSION = '2020.3.15 업데이트';
 
