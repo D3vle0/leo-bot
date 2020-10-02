@@ -2,11 +2,21 @@ const Discord = require('discord.js');
 const bot = new Discord.Client();
 const request = require('request');
 const cheerio = require('cheerio');
+const fs = require('fs');
+
+let data = JSON.parse(fs.readFileSync('credentials.json'));
+console.log("bot token = " + data.token)
 
 //초기 설정값
-const token = '';
+const token = data.token;
+const github_token = data.github_api;
 const prefix = '!';
-const VERSION = '2020.7.13 업데이트\n\n업데이트 사항\n1. 잔류 자동 급식 알림 시간 오류 수정\n2. \'mealbot on\' 취약점 수정';
+const VERSION = `2020.10.3 업데이트
+
+업데이트 사항
+1. 메세지 출력을 embed 형식으로 변경 (진행 중)
+2. codeup.kr 전적 기능
+3. github api 이용한 github 유저 정보 크롤링`
 
 var uptime_sec = 0
 var uptime_min = 0
@@ -48,14 +58,32 @@ bot.on('message', message => {
             if (!error && response.statusCode == 200) {
                 const $ = cheerio.load(html);
                 try { var tom_morning = $(".todaytemp")[num1].children[0].data; } catch (e) {
-                    message.channel.send(`에러 발생: ${e.name}: ${e.message}\n실존하는 지역을 입력해줘!`);
+                  let embed = new Discord.MessageEmbed()
+                  .setColor('#de0b43')
+                  .setTitle('날씨')
+                  .setDescription('')
+                  .addField(':exclamation:  에러 발생', '에러 코드 0x01: 실존하는 지역이 아님', true)
+                  message.channel.send(embed)
                 }
                 try { } catch (e) { }
                 try { var weather_morning = $(".cast_txt")[num1].children[0].data; } catch (e) { }
                 try { var tom_after = $(".todaytemp")[num2].children[0].data; } catch (e) { }
                 try { var weather_after = $(".cast_txt")[num2].children[0].data } catch (e) { } finally {
-                    if (tom_morning !== undefined || tom_after !== undefined)
-                        message.channel.send(`${date} 날씨\n오전: ${tom_morning}℃ ${weather_morning}\n오후: ${tom_after}℃ ${weather_after}`);
+                    if (tom_morning !== undefined || tom_after !== undefined){
+                      let embed = new Discord.MessageEmbed()
+                      .setColor('#4fe8a3')
+                      .setTitle(args[1] + " " + args[2] + ' 날씨')
+                      .setDescription('')
+                      if (tom_morning > tom_after){
+                        embed.addField('낮 :high_brightness:  ', weather_morning + " " + tom_morning, true)
+                        embed.addField('밤 :crescent_moon:  ', weather_after + " " + tom_after, true)
+                      }
+                      else{
+                        embed.addField('오전 :high_brightness:  ', weather_morning + " " + tom_morning, true)
+                        embed.addField('오후 :crescent_moon:  ', weather_after + " " + tom_after, true)
+                      }
+                      message.channel.send(embed)
+                    }
                 }
             }
         });
@@ -79,7 +107,12 @@ bot.on('message', message => {
             request('http://hangang.dkserver.wo.tc', (error, response, html) => {
                 if (!error && response.statusCode == 200) {
                     const river = JSON.parse(html);
-                    message.channel.send(`한강 수온: ${river.temp}\n측정 시각: ${river.time}`);
+                    let embed = new Discord.MessageEmbed()
+                    .setColor('#4fe8a3')
+                    .setTitle('한강 수온')
+                    .setDescription('')
+                    .addField(':droplet: ' + river.temp, '측정 시각: ' + river.time, true)
+                    message.channel.send(embed)
                 }
             });
             break;
@@ -95,17 +128,61 @@ bot.on('message', message => {
                         if (!error && response.statusCode == 200) {
                             const $ = cheerio.load(html);
                             try { var temperature = $(".todaytemp")[0].children[0].data; } catch (e) {
-                                message.channel.send(`에러 발생: ${e.name}: ${e.message}\n실존하는 지역을 입력해줘!`);
+                              let embed = new Discord.MessageEmbed()
+                              .setColor('#de0b43')
+                              .setTitle('날씨')
+                              .setDescription('')
+                              .addField(':exclamation:  에러 발생', '에러 코드 0x01: 실존하는 지역이 아님', true)
+                              message.channel.send(embed)
                             }
                             try { var weather = $(".cast_txt")[0].children[0].data; } catch (e) { }
                             try { var temp_min = $(".num")[0].children[0].data; } catch (e) { }
                             try { var temp_high = $(".num")[1].children[0].data; } catch (e) { }
                             try { var temp_body = $(".num")[2].children[0].data; } catch (e) { } finally {
-                                if (temperature !== undefined || weather !== undefined)
-                                    message.channel.send(`오늘 날씨: ${temperature}℃\n${weather}\n최저: ${temp_min}, 최고: ${temp_high}\n체감: ${temp_body}`);
+                                if (temperature !== undefined || weather !== undefined){
+                                  let embed = new Discord.MessageEmbed()
+                                  .setColor('#4fe8a3')
+                                  .setTitle(args[1]+' 날씨')
+                                  .setDescription('')
+                                  temp_high = Number(temp_high);
+                                  temp_min = Number(temp_min);
+                                  if (Number.isInteger(temp_high) && Number.isInteger(temp_min)){
+                                    if (weather.indexOf('맑') != -1)
+                                      embed.addField('기온', ':sunny:  ' + temperature + '\n:arrow_up_small:  ' + temp_high + '\n:arrow_down_small:  ' + temp_min, false)
+                                    else if (weather.indexOf('흐') != -1)
+                                      embed.addField('기온', ':cloud:  ' + temperature + '\n:arrow_up_small:  ' + temp_high + '\n:arrow_down_small:  ' + temp_min, false)
+                                    else if (weather.indexOf('비') != -1)
+                                      embed.addField('기온', ':cloud_rain:  ' + temperature + '\n:arrow_up_small:  ' + temp_high + '\n:arrow_down_small:  ' + temp_min, false)
+                                    else if (weather.indexOf('대체로 화창') != -1)
+                                      embed.addField('기온', ':partly_sunny:  ' + temperature + '\n:arrow_up_small:  ' + temp_high + '\n:arrow_down_small:  ' + temp_min, false)
+                                    else
+                                      embed.addField('기온', temperature + '\n:arrow_up_small:  ' + temp_high + '\n:arrow_down_small:  ' + temp_min, false)
+                                  }
+                                  else {
+                                    if (weather.indexOf('맑') != -1)
+                                      embed.addField('기온', ':sunny:  ' + temperature, false)
+                                    else if (weather.indexOf('흐') != -1)
+                                      embed.addField('기온', ':cloud: ' + temperature, false)
+                                    else if (weather.indexOf('비') != -1)
+                                      embed.addField('기온', ':cloud_rain:  ' + temperature, false)
+                                    else if (weather.indexOf('대체로 화창') != -1)
+                                      embed.addField('기온', ':partly_sunny:  ' + temperature, false)
+                                    else
+                                      embed.addField('기온', temperature, false)
+                                  }
+                                  message.channel.send(embed)
+                                }
                             }
                         }
                     });
+                }
+                else{
+                  let embed = new Discord.MessageEmbed()
+                  .setColor('#de0b43')
+                  .setTitle('날씨')
+                  .setDescription('')
+                  .addField(':exclamation:  에러 발생', '에러 코드 0x02: 특수문자 입력 에러', true)
+                  message.channel.send(embed)
                 }
             }
             else if (args[2] == '내일')
@@ -119,7 +196,12 @@ bot.on('message', message => {
             if (!args[1])
                 message.channel.send('지역을 입력해! `!미세먼지 <지역>`');
             else {
-                var weatherurl = 'https://search.naver.com/search.naver?sm=top_hty&fbm=1&ie=utf8&query='.concat(args[1], "+날씨");
+                if (!args[2])
+                  var weatherurl = 'https://search.naver.com/search.naver?sm=top_hty&fbm=1&ie=utf8&query='.concat(args[1], "+날씨");
+                else if (!args[3])
+                  var weatherurl = 'https://search.naver.com/search.naver?sm=top_hty&fbm=1&ie=utf8&query=' + args[1] + ' ' + args[2] + ' ' + '+날씨';
+                  else if (!args[4])
+                    var weatherurl = 'https://search.naver.com/search.naver?sm=top_hty&fbm=1&ie=utf8&query=' + args[1] + ' ' + args[2] + ' ' + args[3] + ' ' + '+날씨';
                 var realurl = (encodeURI(weatherurl));
                 request(realurl, (error, response, html) => {
                     if (!error && response.statusCode == 200) {
@@ -147,8 +229,15 @@ bot.on('message', message => {
                             var status2 = '나쁨';
                         else if (chomise[0] > 150)
                             var status2 = '매우 나쁨';
-                        message.channel.send('미세먼지: ' + mise[0] + ', ' + status1 + '\n초미세먼지: ' + chomise + ' ' + status2 + '\n오존지수: ' + $(".num")[6].children[0].data);
-                    }
+                        let embed = new Discord.MessageEmbed()
+                          .setColor('#4fe8a3')
+                          .setTitle('미세먼지')
+                          .setDescription('')
+                          .addField('미세먼지 ', mise[0] + ' ' + status1, true)
+                          .addField('초미세먼지 ', chomise + ' ' + status2, true)
+                          .addField('오존지수 ', $(".num")[6].children[0].data, true)
+                        message.channel.send(embed)
+                      }
                 });
             }
             break;
@@ -159,13 +248,16 @@ bot.on('message', message => {
                 if (!args[2]) {
                     var location = args[1];
                     var url = 'https://sunrise-sunset.org/search?location=' + encodeURI(args[1]);
-                } else if (!args[3]) {
+                }
+                else if (!args[3]) {
                     var location = args[1] + ' ' + args[2];
                     var url = 'https://sunrise-sunset.org/search?location=' + encodeURI(args[1] + ' ' + args[2]);
-                } else if (!args[4]) {
+                }
+                else if (!args[4]) {
                     var location = args[1] + ' ' + args[2] + ' ' + args[3];
                     var url = 'https://sunrise-sunset.org/search?location=' + encodeURI(args[1] + ' ' + args[2] + ' ' + args[3]);
-                } else if (!args[5]) {
+                }
+                else if (!args[5]) {
                     var location = args[1] + ' ' + args[2] + ' ' + args[3] + ' ' + args[4];
                     var url = 'https://sunrise-sunset.org/search?location=' + encodeURI(args[1] + ' ' + args[2] + ' ' + args[3] + ' ' + args[4]);
                 }
@@ -175,13 +267,25 @@ bot.on('message', message => {
                         try {
                             var sunrise1 = $(".time")[0].children[0].data;
                         } catch (e) {
-                            message.channel.send(`에러 발생: ${e.name}: ${e.message}\n실존하는 지역을 입력해줘!`);
+                          let embed = new Discord.MessageEmbed()
+                          .setColor('#de0b43')
+                          .setTitle('일출 :high_brightness:')
+                          .setDescription('')
+                          .addField(':exclamation:  에러 발생', '에러 코드 0x01: 실존하는 지역을 입력해줘!', true)
+                          message.channel.send(embed)
                         }
                         try {
                             var sunrise2 = $(".time")[2].children[0].data;
                         } catch (e) { } finally {
-                            if (sunrise1 !== undefined && sunrise2 !== undefined)
-                                message.channel.send(location + ' 일출시간\n오늘: ' + sunrise1 + '\n내일: ' + sunrise2);
+                            if (sunrise1 !== undefined && sunrise2 !== undefined){
+                              let embed = new Discord.MessageEmbed()
+                                .setColor('#4fe8a3')
+                                .setTitle(location + ' 일출 :high_brightness:')
+                                .setDescription('')
+                                .addField('오늘: ', sunrise1, true)
+                                .addField('내일: ', sunrise2, true)
+                              message.channel.send(embed)
+                            }
                         }
                     }
                 });
@@ -211,13 +315,26 @@ bot.on('message', message => {
                         try {
                             var sunset1 = $(".time")[1].children[0].data;
                         } catch (e) {
-                            message.channel.send(`에러 발생: ${e.name}: ${e.message}\n실존하는 지역을 입력해줘!`);
+                          let embed = new Discord.MessageEmbed()
+                          .setColor('#de0b43')
+                          .setTitle('일출 :high_brightness:')
+                          .setDescription('')
+                          .addField(':exclamation:  에러 발생', '에러 코드 0x01: 실존하는 지역을 입력해줘!', true)
+                          message.channel.send(embed)
                         }
                         try {
                             var sunset2 = $(".time")[3].children[0].data;
                         } catch (e) { } finally {
-                            if (sunset1 !== undefined && sunset2 !== undefined)
-                                message.channel.send(location + ' 일몰시간\n오늘: ' + sunset1 + '\n내일: ' + sunset2);
+                            if (sunset1 !== undefined && sunset2 !== undefined){
+                              let embed = new Discord.MessageEmbed()
+                                .setColor('#4fe8a3')
+                                .setTitle(location + ' 일출 :high_brightness:')
+                                .setDescription('')
+                                .addField('오늘: ', sunset1, true)
+                                .addField('내일: ', sunset2, true)
+                              message.channel.send(embed)
+                            }
+
                         }
                     }
                 });
@@ -228,8 +345,15 @@ bot.on('message', message => {
             request('https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC,ETH,EOS,XRP&tsyms=KRW&api_key=ad9090f2d621b5535bc535ba9d8557c072e5e3eaaed46a080cede10dc5e98c04', (error, response, html) => {
                 if (!error && response.statusCode == 200) {
                     const bit = JSON.parse(html);
-                    message.channel.send(`가상화폐 시세\n비트코인: ${bit.BTC.KRW}원\n이더리움: ${bit.ETH.KRW}원\n이오스: ${bit.EOS.KRW}원\n리플: ${bit.XRP.KRW}원`);
-
+                    let embed = new Discord.MessageEmbed()
+                      .setColor('#4fe8a3')
+                      .setTitle('가상화폐 시세 :money_with_wings:')
+                      .setDescription('')
+                      .addField('BTC: ', bit.BTC.KRW, true)
+                      .addField('ETH: ', bit.ETH.KRW, true)
+                      .addField('EOS: ', bit.EOS.KRW, true)
+                      .addField('XRP: ', bit.XRP.KRW, true)
+                    message.channel.send(embed)
                 }
             });
             break;
@@ -250,7 +374,12 @@ bot.on('message', message => {
             break;
         case '버전':
         case '업데이트':
-            message.channel.send(VERSION);
+          let embed = new Discord.MessageEmbed()
+            .setColor('#4fe8a3')
+            .setTitle('업데이트 사항')
+            .setDescription('')
+            .addField('최근 업데이트: ', VERSION, true)
+          message.channel.send(embed)
             break;
         case '전적':
             if (!args[1])
@@ -293,7 +422,17 @@ bot.on('message', message => {
                     const $ = cheerio.load(html);
                     var no_comma = parseInt($(".info_num")[0].children[0].data.replace(/,/g, ""));
                     var death = $(".info_num")[3].children[0].data;
-                    message.channel.send('국내 확진자: ' + $(".info_num")[0].children[0].data + '명\n격리해제: ' + $(".info_num")[2].children[0].data + '명\n검사 진행중: ' + $(".info_num")[1].children[0].data + '명\n사망자: ' + $(".info_num")[3].children[0].data + '명\n\n국내 치사율: ' + death / no_comma * 100 + '%');
+
+                    let embed = new Discord.MessageEmbed()
+                    .setColor('#4fe8a3')
+                    .setTitle('코로나19 확진자 현황')
+                    .setDescription('')
+                    .addField('국내 확진자','국내 확진자: ' + $(".info_num")[0].children[0].data + '명', true)
+                    .addField('격리 해제','격리 해제: ' + $(".info_num")[2].children[0].data + '명', true)
+                    .addField('검사 진행 중','검사 진행 중: ' + $(".info_num")[1].children[0].data + '명', true)
+                    .addField('사망','사망: ' + $(".info_num")[3].children[0].data + '명', true)
+                    .addField('국내 치사율','국내 치사율: ' + death / no_comma * 100 + '%', true)
+                    message.channel.send(embed)
                 }
             });
             break;
@@ -408,7 +547,7 @@ bot.on('message', message => {
             break;
         case '디미':
             if (!args[1])
-                message.channel.send('디미고 디스코드 방의 현재 상태를 알 수 있는 명령어야!\n```!디미 서버이름\n!디미 초대코드\n!디미 서버아이디\n!디미 온라인```');
+                message.channel.send('```!디미 서버이름\n!디미 초대코드\n!디미 공지```');
             else {
                 if (args[1] == '서버이름')
                     request('https://discordapp.com/api/guilds/665163164471787530/widget.json', (error, response, html) => {
@@ -426,11 +565,19 @@ bot.on('message', message => {
                     });
                 }
                 else if (args[1] == '공지') {
-                    request('https://dimigo.hs.kr', (error, response, html) => {
+                    request('https://www.dimigo.hs.kr/index.php?mid=school_notice', (error, response, html) => {
                         if (!error && response.statusCode == 200) {
-                            const $ = cheerio.load(body);
-                            var test = $('.post-content').children[0].data
-                            message.channel.send(test);
+                            const $ = cheerio.load(html);
+                            let embed = new Discord.MessageEmbed()
+                            .setColor('#ec137f')
+                            .setTitle('디미고 공지')
+                            .setDescription('')
+                            .addField(($("#dimigo_post_cell_2 > tr:nth-child(1) > td.title > div > a")[0].children[0].data), ($("#dimigo_post_cell_2 > tr:nth-child(1) > td.title > div > a").attr("href")), false)
+                            .addField(($("#dimigo_post_cell_2 > tr:nth-child(2) > td.title > div > a")[0].children[0].data), ($("#dimigo_post_cell_2 > tr:nth-child(2) > td.title > div > a").attr("href")), false)
+                            .addField(($("#dimigo_post_cell_2 > tr:nth-child(3) > td.title > div > a")[0].children[0].data), ($("#dimigo_post_cell_2 > tr:nth-child(3) > td.title > div > a").attr("href")), false)
+                            .addField(($("#dimigo_post_cell_2 > tr:nth-child(4) > td.title > div > a")[0].children[0].data), ($("#dimigo_post_cell_2 > tr:nth-child(4) > td.title > div > a").attr("href")), false)
+                            .addField(($("#dimigo_post_cell_2 > tr:nth-child(5) > td.title > div > a")[0].children[0].data), ($("#dimigo_post_cell_2 > tr:nth-child(5) > td.title > div > a").attr("href")), false)
+                            message.channel.send(embed)
                         }
                     });
                 }
@@ -602,6 +749,47 @@ bot.on('message', message => {
                 });
             }
             break;
+        case 'codeup':
+        case '코드업':
+            if (!args[1])
+                message.channel.send('사용법: `!코드업 <닉네임>`');
+            else {
+                request("https://codeup.kr/userinfo.php?user=" + args[1], (error, response, html) => {
+                    if (!error && response.statusCode == 200) {
+                        const $ = cheerio.load(html);
+                        var name = $(".d-inline > strong > a > span")[0].children[0].data;
+                        var cd_rank = $("body > main > div.container.mt-2 > div.row > div.col-md-12.col-lg-4 > table > tbody > tr:nth-child(1) > td.text-center")[0].children[0].data.replace(/ /g, " ");
+                        //rank = rank.replace(/ /g,"\n");
+                        var solved = $(".text-center > a")[0].children[0].data;
+                        var submit = $(".text-center > a")[1].children[0].data;
+                        var solved = $("body > main > div.container.mt-2 > div.row > div.col-md-12.col-lg-4 > table > tbody > tr:nth-child(4) > td:nth-child(2) > a")[0].children[0].data;
+
+                        message.channel.send(`${name} 의 전적\n순위: ${cd_rank}\n푼 문제 수: ${solved}\n제출 횟수: ${submit}\n정확한 풀이: ${solved}`);
+                    }
+                });
+            }
+            break;
+        case 'github':
+        case '깃허브':
+          if (!args[1])
+            message.channel.send('사용법: `!github <username>`');
+          else {
+            var options = {
+                'method': 'GET',
+                'url': 'https://api.github.com/users/' + args[1],
+                'headers': {
+                    'Authorization': 'token ' + github_token,
+                    'User-Agent': 'test-api'
+                },
+            };
+            request(options, function (error, response) {
+                if (error) throw new Error(error);{
+                  const data = JSON.parse(response.body);
+                  message.channel.send(`${data.name}\n소개: ${data.bio}\n소속: ${data.company}\n웹페이지: <${data.blog}>\n위치: ${data.location}\n코딩노예가 될 준비: ${data.hireable}`);
+                }
+            });
+          }
+          break;
     }
 })
 
