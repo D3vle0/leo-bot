@@ -11,7 +11,7 @@ console.log("bot token = " + data.token)
 const token = data.token;
 const github_token = data.github_api;
 const prefix = '!';
-const VERSION = `2020.10.3 업데이트
+const VERSION = `2020.10.4 업데이트
 
 업데이트 사항
 1. 메세지 출력을 embed 형식으로 변경 (진행 중)
@@ -92,16 +92,31 @@ bot.on('message', message => {
     switch (args[0]) {
         case '웹페이지':
         case '웹사이트':
-            message.channel.send('http://devleo.us');
+            message.channel.send(new Discord.MessageEmbed()
+            .setColor('#4fe8a3')
+            .setTitle('개발자의 웹사이트')
+            .setDescription('')
+            .addField('http://devleo.us', '많이 방문해주세요' ,false)
+          )
             break;
         case '개발자':
         case '제작자':
-            if (!args[1])
-                message.channel.send('1423 배상혁 (Devleo) :fire:\n개발자를 호출하려면 `!개발자 호출` 을 입력해봐!\n개발자에게 dm 하려면 `!개발자 dm` 을 입력해봐!');
-            if (args[1] == '호출')
-                message.channel.send(`<@!671631736404180992>\n ${message.author} 님이 호출했습니다!`);
-            else if (args[1] == 'dm')
-                message.author.send("봇에 문제가 있나요? @D3vle0#1846 에게 dm 주세요!");
+            if (!args[1]){
+              message.channel.send(new Discord.MessageEmbed()
+              .setColor('#4fe8a3')
+              .setTitle('개발자')
+              .setDescription('`!개발자 호출` 로 나를 부를 수 있어! 물론 같은서버에 있어야지 ..')
+              .addField('개발자', 'KDMHS 19WP 배상혁\n@D3vle0#1846' ,false)
+            )
+          }
+            if (args[1] == '호출'){
+              message.channel.send(new Discord.MessageEmbed()
+              .setColor('#4fe8a3')
+              .setTitle('개발자 호출')
+              .setDescription('<@!671631736404180992>')
+              .addField('누군가가 불렀어요!', `${message.author} 님의 메세지를 확인하세요!` ,false)
+            )
+            }
             break;
         case '한강':
             request('http://hangang.dkserver.wo.tc', (error, response, html) => {
@@ -685,57 +700,140 @@ bot.on('message', message => {
             catch (e) {
 
             }
-            console.log(meal_url);
-            if (!args[1])
-                message.channel.send("사용법: `!급식 <시간> [날짜]`");
+            if (!args[1]){
+              message.channel.send(new Discord.MessageEmbed()
+              .setColor('#4fe8a3')
+              .setTitle('디미고 급식')
+              .setDescription('')
+              .addField('사용법', '`!급식 <시간> [날짜]`' ,false)
+            )
+            }
             else if (args[1]) {
                 function meal_print() {
                     if (args[1] == '아침') {
                         request(meal_url, (error, response, html) => {
+                          const meal = JSON.parse(html);
                             if (!error && response.statusCode == 200) {
-                                const meal = JSON.parse(html);
+                              if (meal.breakfast === undefined){
+                                message.channel.send(new Discord.MessageEmbed()
+                                .setColor('#de0b43')
+                                .setTitle('디미고 급식')
+                                .setDescription('')
+                                .addField(':exclamation:  에러 발생', '에러 코드 0x11: 급식 데이터가 없어!', true)
+                              )
+                              }
+                              else {
                                 var repl = meal.breakfast.replace(/\//gi, '\n');
-                                if (!args[2])
-                                    message.channel.send(`- ${meal_month}월 ${meal_day}일 아침 메뉴\n${repl}`);
-                                else
-                                    message.channel.send('- ' + args[2].slice(4, 6) + '월' + args[2].slice(6) + '일 아침메뉴\n' + `${repl}`);
+                                if (!args[2]){
+                                  message.channel.send(new Discord.MessageEmbed()
+                                  .setColor('#4fe8a3')
+                                  .setTitle('디미고 급식')
+                                  .setDescription('')
+                                  .addField(`${meal_month}월 ${meal_day}일 아침 메뉴`, `${repl}` ,false)
+                                )
+                                }
+                                else {
+                                  message.channel.send(new Discord.MessageEmbed()
+                                  .setColor('#4fe8a3')
+                                  .setTitle('디미고 급식')
+                                  .setDescription('')
+                                  .addField(args[2].slice(4, 6) + '월' + args[2].slice(6) + '일 아침메뉴', `${repl}` ,false)
+                                )
+                                }
+                              }
                             }
                         });
                     }
                     else if (args[1] == '점심') {
                         request(meal_url, (error, response, html) => {
+                          const meal = JSON.parse(html);
                             if (!error && response.statusCode == 200) {
-                                const meal = JSON.parse(html);
+                              if (meal.lunch === undefined){
+                                message.channel.send(new Discord.MessageEmbed()
+                                .setColor('#de0b43')
+                                .setTitle('디미고 급식')
+                                .setDescription('')
+                                .addField(':exclamation:  에러 발생', '에러 코드 0x11: 급식 데이터가 없어!', true)
+                              )
+                              }
+                              else {
                                 var repl = meal.lunch.replace(/\//gi, '\n');
-                                if (!args[2])
-                                    message.channel.send(`- ${meal_month}월 ${meal_day}일 점심 메뉴\n${repl}`);
-                                else
-                                    message.channel.send('- ' + args[2].slice(4, 6) + '월' + args[2].slice(6) + '일 점심메뉴\n' + `${repl}`);
+                                if (!args[2]){
+                                  message.channel.send(new Discord.MessageEmbed()
+                                  .setColor('#4fe8a3')
+                                  .setTitle('디미고 급식')
+                                  .setDescription('')
+                                  .addField(`${meal_month}월 ${meal_day}일 아침 메뉴`, `${repl}` ,false)
+                                )
+                                }
+                                else {
+                                  message.channel.send(new Discord.MessageEmbed()
+                                  .setColor('#4fe8a3')
+                                  .setTitle('디미고 급식')
+                                  .setDescription('')
+                                  .addField(args[2].slice(4, 6) + '월' + args[2].slice(6) + '일 점심메뉴', `${repl}` ,false)
+                                )
+                                }
+                              }
                             }
                         });
                     }
                     else if (args[1] == '저녁') {
                         request(meal_url, (error, response, html) => {
+                          const meal = JSON.parse(html);
+                          console.log(meal.dinner);
                             if (!error && response.statusCode == 200) {
-                                const meal = JSON.parse(html);
+                              if (meal.dinner === undefined){
+                                message.channel.send(new Discord.MessageEmbed()
+                                .setColor('#de0b43')
+                                .setTitle('디미고 급식')
+                                .setDescription('')
+                                .addField(':exclamation:  에러 발생', '에러 코드 0x11: 급식 데이터가 없어!', true)
+                              )
+                              }
+                              else {
                                 var repl = meal.dinner.replace(/\//gi, '\n');
-                                if (!args[2])
-                                    message.channel.send(`- ${meal_month}월 ${meal_day}일 저녁 메뉴\n${repl}`);
-                                else
-                                    message.channel.send('- ' + args[2].slice(4, 6) + '월' + args[2].slice(6) + '일 저녁메뉴\n' + `${repl}`);
+                                if (!args[2]){
+                                  message.channel.send(new Discord.MessageEmbed()
+                                  .setColor('#4fe8a3')
+                                  .setTitle('디미고 급식')
+                                  .setDescription('')
+                                  .addField(`${meal_month}월 ${meal_day}일 아침 메뉴`, `${repl}` ,false)
+                                )
+                                }
+                                else{
+                                  message.channel.send(new Discord.MessageEmbed()
+                                  .setColor('#4fe8a3')
+                                  .setTitle('디미고 급식')
+                                  .setDescription('')
+                                  .addField(args[2].slice(4, 6) + '월' + args[2].slice(6) + '일 점심메뉴', `${repl}` ,false)
+                                )
+                                }
+                              }
                             }
                         });
                     }
                     else {
-                        message.channel.send('시간은 아침, 점심, 저녁을 입력해줘!');
+                      message.channel.send(new Discord.MessageEmbed()
+                      .setColor('#de0b43')
+                      .setTitle('디미고 급식')
+                      .setDescription('')
+                      .addField(':exclamation:  에러 발생', '에러 코드 0x10: 시간은 아침, 점심, 저녁을 입력해줘!', true)
+                    )
                     }
                 }
                 if (args[2] && args[2].length == 8) {
                     var meal_url = 'https://api.dimigo.in/dimibobs/' + args[2];
                     meal_print();
                 }
-                else if (args[2] && args[2].length != 8)
-                    message.channel.send('날짜는 YYYYMMDD 형태로 입력해줘!');
+                else if (args[2] && args[2].length != 8){
+                  message.channel.send(new Discord.MessageEmbed()
+                  .setColor('#de0b43')
+                  .setTitle('디미고 급식')
+                  .setDescription('')
+                  .addField(':exclamation:  에러 발생', '에러 코드 0x11: YYYYMMDD 형태로 입력해줘!', true)
+                )
+                }
                 else
                     meal_print();
             }
