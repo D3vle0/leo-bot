@@ -328,7 +328,7 @@ bot.on('message', message => {
                             if (sunset1 !== undefined && sunset2 !== undefined){
                               let embed = new Discord.MessageEmbed()
                                 .setColor('#4fe8a3')
-                                .setTitle(location + ' 일출 :high_brightness:')
+                                .setTitle(location + ' 일몰 :high_brightness:')
                                 .setDescription('')
                                 .addField('오늘: ', sunset1, true)
                                 .addField('내일: ', sunset2, true)
@@ -358,18 +358,47 @@ bot.on('message', message => {
             });
             break;
         case '국밥':
-            if (!args[1])
-                message.channel.send('입력한 금액이 몇 국밥인지 계산을 하고 싶으면\n`!국밥 <금액>` 을 입력해봐!');
+            if (!args[1]){
+              let embed = new Discord.MessageEmbed()
+                .setColor('#4fe8a3')
+                .setTitle('국밥 계산기')
+                .setDescription('1국밥 == 7000원')
+                .addField('\0', '입력한 금액이 몇 국밥인지 계산을 하고 싶으면\n`!국밥 <금액>` 을 입력해봐!', true)
+              message.channel.send(embed)
+            }
             else {
                 var gukbap = Math.floor(args[1] / 7000);
-                if (isNaN(gukbap))
-                    message.channel.send('우와! 어떻게 `금액`에 숫자가 아니라 문자를 입력할 수가 있지?');
-                else if (gukbap == Number.POSITIVE_INFINITY)
-                    message.channel.send('이렇게 큰 값을 입력할 줄이야! 대단한걸?');
-                else if (gukbap == Number.NEGATIVE_INFINITY)
-                    message.channel.send('```*이스터에그 발견*\n\n이스터에그 제목: 흙수저\n\n이곳에 오게 되다니 너의 창의력은 정말 대단하구나.```');
-                else
-                    message.channel.send(gukbap + '국밥이야!');
+                if (isNaN(gukbap)){
+                  let embed = new Discord.MessageEmbed()
+                  .setColor('#de0b43')
+                  .setTitle('국밥 계산기')
+                  .setDescription('')
+                  .addField(':exclamation:  에러 발생', '에러 코드 0x03: 문자는 입력할 수 없어!', true)
+                  message.channel.send(embed)
+                }
+                else if (gukbap == Number.POSITIVE_INFINITY){
+                  let embed = new Discord.MessageEmbed()
+                  .setColor('#de0b43')
+                  .setTitle('국밥 계산기')
+                  .setDescription('')
+                  .addField(':exclamation:  에러 발생', '에러 코드 0x04: 값이 무한대에 도달함!', true)
+                  message.channel.send(embed)
+                }
+                else if (gukbap == Number.NEGATIVE_INFINITY){
+                  let embed = new Discord.MessageEmbed()
+                  .setColor('#de0b43')
+                  .setTitle('국밥 계산기')
+                  .setDescription('')
+                  .addField(':exclamation:  *이스터에그 발견*', '제목: 흙수저\n\n이곳에 오게 되다니 너의 창의력은 정말 대단하구나.', false)
+                  message.channel.send(embed)
+                }
+                else{
+                  let embed = new Discord.MessageEmbed()
+                    .setColor('#4fe8a3')
+                    .setTitle('국밥 계산기')
+                    .addField(args[1] + "원은...", gukbap + ' 국밥이야!', true)
+                  message.channel.send(embed)
+                }
             }
             break;
         case '버전':
@@ -382,12 +411,23 @@ bot.on('message', message => {
           message.channel.send(embed)
             break;
         case '전적':
-            if (!args[1])
-                message.channel.send('`!전적 <닉네임>` 입력해!');
+            if (!args[1]){
+              let embed = new Discord.MessageEmbed()
+                .setColor('#4fe8a3')
+                .setTitle('롤 전적 검색')
+                .setDescription('')
+                .addField('사용: ', '`!전적 <닉네임>` 입력해!', true)
+              message.channel.send(embed)
+            }
             else {
                 if (message.content.indexOf('.') != -1 || message.content.indexOf('/') != -1) {
-                    message.channel.send('어머 지금 LFI 취약점 하려구? 그건 안돼 !!');
-                    break;
+                  let embed = new Discord.MessageEmbed()
+                  .setColor('#de0b43')
+                  .setTitle('롤 전적 검색')
+                  .setDescription('')
+                  .addField(':exclamation:  에러 발생', '에러 코드 0x05: 어머 지금 LFI 취약점 하려구? 그건 안돼 !!', true)
+                  message.channel.send(embed)
+                  break;
                 }
                 var url = 'https://www.op.gg/summoner/userName=' + (encodeURI(args[1]));
 
@@ -397,17 +437,39 @@ bot.on('message', message => {
                         try {
                             var ranktype = $(".RankType")[0].children[0].data;
                         } catch (e) {
-                            message.channel.send(`에러 발생: ${e.name}: ${e.message}\n검색 결과 없음!`);
+                          let embed = new Discord.MessageEmbed()
+                          .setColor('#de0b43')
+                          .setTitle('롤 전적 검색')
+                          .setDescription('')
+                          .addField(':exclamation:  에러 발생', '에러 코드 0x06: 존재하지 않는 닉네임!', true)
+                          message.channel.send(embed)
                         }
                         try { var tierrank = $(".TierRank")[0].children[0].data.trim() } catch (e) { }
                         try { var win = $(".win")[0].children[0].data; } catch (e) { }
                         try { var lose = $(".lose")[0].children[0].data; } catch (e) { }
+                        var kda =""
+                        for (var i=1;i<=5;i++){
+                          try { kda+=$("#SummonerLayoutContent > div.tabItem.Content.SummonerLayoutContent.summonerLayout-summary > div.RealContent > div > div.Content > div.GameItemList > div:nth-child(" + i + ") > div > div.Content > div.KDA > div.KDA > span.Kill")[0].children[0].data + '/'; }
+                          catch (e) { break; }
+                          kda+=$("#SummonerLayoutContent > div.tabItem.Content.SummonerLayoutContent.summonerLayout-summary > div.RealContent > div > div.Content > div.GameItemList > div:nth-child(" + i + ") > div > div.Content > div.KDA > div.KDA > span.Death")[0].children[0].data + '/';
+                          kda+=$("#SummonerLayoutContent > div.tabItem.Content.SummonerLayoutContent.summonerLayout-summary > div.RealContent > div > div.Content > div.GameItemList > div:nth-child(" + i + ") > div > div.Content > div.KDA > div.KDA > span.Assist")[0].children[0].data + '\n';
+                        }
                         if (ranktype !== undefined) {
-                            message.channel.send('https://www.op.gg/summoner/userName=' + args[1] + '\n랭크 타입: ' + ranktype + '\n랭크: ' + tierrank + '\n최근 20경기: ' + win + '승 ' + lose + '패 (승률 ' + Math.floor(win / 20 * 100) + '%)');
+                          let embed = new Discord.MessageEmbed()
+                            .setColor('#4fe8a3')
+                            .setTitle('롤 전적 검색')
+                            .addField(args[1] + "의 전적",'랭크 타입: ' + ranktype + '\n랭크: ' + tierrank + '\n최근 20경기: ' + win + '승 ' + lose + '패 (승률 ' + Math.floor(win / 20 * 100) + '%)', false)
+                            .addField('최근 5경기', kda, false)
+                          message.channel.send(embed)
                         }
                     }
                     else if (response.statusCode == 400) {
-                        message.author.send('전적검색 기능에 이스터에그 발견!!')
+                      let embed = new Discord.MessageEmbed()
+                      .setColor('#de0b43')
+                      .setTitle('롤 전적 검색')
+                      .setDescription('')
+                      .addField(':exclamation:  *이스터에그 발견*', '제목: 400\n\nop.gg에 비정상적인 쿼리를 보내는데 성공!', false)
+                      message.channel.send(embed)
                     }
                 });
             }
@@ -427,11 +489,11 @@ bot.on('message', message => {
                     .setColor('#4fe8a3')
                     .setTitle('코로나19 확진자 현황')
                     .setDescription('')
-                    .addField('국내 확진자','국내 확진자: ' + $(".info_num")[0].children[0].data + '명', true)
-                    .addField('격리 해제','격리 해제: ' + $(".info_num")[2].children[0].data + '명', true)
-                    .addField('검사 진행 중','검사 진행 중: ' + $(".info_num")[1].children[0].data + '명', true)
-                    .addField('사망','사망: ' + $(".info_num")[3].children[0].data + '명', true)
-                    .addField('국내 치사율','국내 치사율: ' + death / no_comma * 100 + '%', true)
+                    .addField('국내 확진자','국내 확진자: ' + $(".info_num")[0].children[0].data + '명', false)
+                    .addField('격리 해제','격리 해제: ' + $(".info_num")[2].children[0].data + '명', false)
+                    .addField('검사 진행 중','검사 진행 중: ' + $(".info_num")[1].children[0].data + '명', false)
+                    .addField('사망','사망: ' + $(".info_num")[3].children[0].data + '명', false)
+                    .addField('국내 치사율','국내 치사율: ' + death / no_comma * 100 + '%', false)
                     message.channel.send(embed)
                 }
             });
@@ -459,6 +521,14 @@ bot.on('message', message => {
             }
             break;
         case '마스크':
+          message.channel.send(new Discord.MessageEmbed()
+          .setColor('#de0b43')
+          .setTitle('약국별 마스크 물량')
+          .setDescription('')
+          .addField('지원 종료 안내','마스크 물량 검색 서비스 지원이 종료되었습니다.', false)
+        )
+
+        /*
             if (!args[1])
                 message.channel.send('검색할 주소를 입력해! `!마스크 <도> <시/군/구> [동]`');
             else {
@@ -478,6 +548,10 @@ bot.on('message', message => {
                                     if (obj.count == 0) {
                                         message.channel.send('존재하지 않는 지역이거나 약국이 없습니다!');
                                     } else {
+                                      let embed = new Discord.MessageEmbed()
+                                      embed.setColor('#4fe8a3')
+                                      embed.setTitle('약국별 마스크 물량')
+                                      embed.setDescription('')
                                         for (var i = 0; i < obj.count; i++) {
                                             if (obj.stores[i].remain_stat == 'null')
                                                 var remain = '데이터 없음';
@@ -493,8 +567,11 @@ bot.on('message', message => {
                                             var tmp1 = stockDate.split('/');
                                             var tmp2 = tmp1[2].split(':');
                                             var tmp3 = tmp2[0].split(' ');
-                                            var printStr = obj.stores[i].name + ' - ' + remain + ' (재입고 ' + tmp1[1] + '월' + tmp3[0] + '일 ' + tmp3[1] + '시 ' + tmp2[1] + '분)';
-                                            message.channel.send(printStr);
+                                            //var printStr = obj.stores[i].name + ' - ' + remain + ' (재입고 ' + tmp1[1] + '월' + tmp3[0] + '일 ' + tmp3[1] + '시 ' + tmp2[1] + '분)';
+
+                                            embed.addField(obj.stores[i].name,remain + ' (재입고 ' + tmp1[1] + '월' + tmp3[0] + '일 ' + tmp3[1] + '시 ' + tmp2[1] + '분)', false)
+                                            message.channel.send(embed)
+                                            //message.channel.send(printStr);
                                         }
                                     }
                                 }
@@ -502,8 +579,10 @@ bot.on('message', message => {
                         );
                     }
                 }
-            }
+            }*/
             break;
+
+
         case '시간표':
             if (!args[1])
                 message.channel.send('요일에 따라 자동으로 불러오는 디미고 시간표! 반을 입력해줘!\n예시: `!시간표 2`');
@@ -543,8 +622,13 @@ bot.on('message', message => {
         */
         case '업타임':
         case 'uptime':
-            message.channel.send(`리오봇이 켜진지 ${uptime_day}일 ${uptime_hour}시간 ${uptime_min}분 ${uptime_sec}초가 지났어!`);
-            break;
+          message.channel.send(new Discord.MessageEmbed()
+          .setColor('#4fe8a3')
+          .setTitle('업타임')
+          .setDescription('')
+          .addField('리오봇이 켜진 지...',`${uptime_day}일 ${uptime_hour}시간 ${uptime_min}분 ${uptime_sec}초가 지났어!`, false)
+        )
+          break;
         case '디미':
             if (!args[1])
                 message.channel.send('```!디미 서버이름\n!디미 초대코드\n!디미 공지```');
@@ -698,6 +782,14 @@ bot.on('message', message => {
             }
             break;
         case '택배':
+          message.channel.send(new Discord.MessageEmbed()
+          .setColor('#de0b43')
+          .setTitle('택배 조회 서비스')
+          .setDescription('')
+          .addField('지원 종료 안내','택배 조회 서비스 지원이 종료되었습니다.', false)
+        )
+
+        /*
             if (!args[1])
                 message.channel.send('운송장 번호를 입력해! (우체국택배)');
             else {
@@ -713,12 +805,18 @@ bot.on('message', message => {
                     else
                         message.channel.send('서버에 문제가 생겼거나 존재하지 않는 운송장 번호야!');
                 });
-            }
+            }*/
             break;
         case 'osu':
         case '오수':
-            if (!args[1])
-                message.channel.send('닉네임 또는 ID (필수) 와 모드 (선택) 를 입력해줘!\n```0 = std\n1 = taiko\n2 = CtB\n3 = mania```');
+            if (!args[1]){
+              message.channel.send(new Discord.MessageEmbed()
+              .setColor('#4fe8a3')
+              .setTitle('osu! 전적 검색')
+              .setDescription('')
+              .addField('닉네임 또는 ID (필수) 와 모드 (선택) 를 입력해줘!', '```0 = std\n1 = taiko\n2 = CtB\n3 = mania```' ,false)
+            )
+            }
             else {
                 if (args[2])
                     var osu_url = 'https://osu.ppy.sh/api/get_user?u=' + args[1] + '&k=20e07253c789e68f4789dcd215ff2aac5174e2f4&m=' + args[2];
@@ -727,8 +825,14 @@ bot.on('message', message => {
                 request(osu_url, (error, response, html) => {
                     if (!error && response.statusCode == 200) {
                         const osu = JSON.parse(html);
-                        if (html == '[]')
-                            message.channel.send('존재하지 않는 유저!');
+                        if (html == '[]'){
+                          message.channel.send(new Discord.MessageEmbed()
+                          .setColor('#de0b43')
+                          .setTitle('osu! 전적 검색')
+                          .setDescription('')
+                          .addField(':exclamation:  에러 발생', '에러 코드 0x06: 존재하지 않는 닉네임!', true)
+                        )
+                        }
                         else {
                             var second = osu[0].total_seconds_played;
                             var hour, min, sec
@@ -738,14 +842,56 @@ bot.on('message', message => {
                             if (hour.toString().length == 1) hour = "0" + hour;
                             if (min.toString().length == 1) min = "0" + min;
                             if (sec.toString().length == 1) sec = "0" + sec;
-                            if (args[2] == undefined)
-                                message.channel.send(`${osu[0].username} 님의 mode 0 전적\n레벨: ${osu[0].level}\n플레이 횟수: ${osu[0].playcount}\n플레이 시간: ${hour}시간 ${min}분 ${sec}초\n가입 날짜: ${osu[0].join_date}\n\n획득 점수: ${osu[0].total_score}\n랭킹: ${osu[0].pp_rank}\n국가 랭킹: ${osu[0].pp_country_rank}\npp: ${osu[0].pp_raw}\n정확도: ${osu[0].accuracy}\n`);
-                            else
-                                message.channel.send(`${osu[0].username} 님의 mode ${args[2]} 전적\n레벨: ${osu[0].level}\n플레이 횟수: ${osu[0].playcount}\n플레이 시간: ${hour}시간 ${min}분 ${sec}초\n가입 날짜: ${osu[0].join_date}\n\n획득 점수: ${osu[0].total_score}\n랭킹: ${osu[0].pp_rank}\n국가 랭킹: ${osu[0].pp_country_rank}\npp: ${osu[0].pp_raw}\n정확도: ${osu[0].accuracy}\n`);
+                            if (args[2] == undefined || args[2] == 0){
+                              message.channel.send(new Discord.MessageEmbed()
+                              .setColor('#4fe8a3')
+                              .setTitle('osu! 전적 검색')
+                              .setDescription('')
+                              .addField(`${osu[0].username} 의 Std 전적`, `레벨: ${osu[0].level}\n플레이 횟수: ${osu[0].playcount}\n플레이 시간: ${hour}시간 ${min}분 ${sec}초\n가입 날짜: ${osu[0].join_date}\n\n획득 점수: ${osu[0].total_score}\n랭킹: ${osu[0].pp_rank}\n국가 랭킹: ${osu[0].pp_country_rank}\npp: ${osu[0].pp_raw}\n정확도: ${osu[0].accuracy}\n` ,false)
+                            )
+                            }
+                            else if (args[2] == 1){
+                              message.channel.send(new Discord.MessageEmbed()
+                              .setColor('#4fe8a3')
+                              .setTitle('osu! 전적 검색')
+                              .setDescription('')
+                              .addField(`${osu[0].username} 의 Taiko 전적`, `레벨: ${osu[0].level}\n플레이 횟수: ${osu[0].playcount}\n플레이 시간: ${hour}시간 ${min}분 ${sec}초\n가입 날짜: ${osu[0].join_date}\n\n획득 점수: ${osu[0].total_score}\n랭킹: ${osu[0].pp_rank}\n국가 랭킹: ${osu[0].pp_country_rank}\npp: ${osu[0].pp_raw}\n정확도: ${osu[0].accuracy}\n` ,false)
+                            )
+                            }
+                            else if (args[2] == 2){
+                              message.channel.send(new Discord.MessageEmbed()
+                              .setColor('#4fe8a3')
+                              .setTitle('osu! 전적 검색')
+                              .setDescription('')
+                              .addField(`${osu[0].username} 의 Catch 전적`, `레벨: ${osu[0].level}\n플레이 횟수: ${osu[0].playcount}\n플레이 시간: ${hour}시간 ${min}분 ${sec}초\n가입 날짜: ${osu[0].join_date}\n\n획득 점수: ${osu[0].total_score}\n랭킹: ${osu[0].pp_rank}\n국가 랭킹: ${osu[0].pp_country_rank}\npp: ${osu[0].pp_raw}\n정확도: ${osu[0].accuracy}\n` ,false)
+                            )
+                            }
+                            else if (args[2] == 3){
+                              message.channel.send(new Discord.MessageEmbed()
+                              .setColor('#4fe8a3')
+                              .setTitle('osu! 전적 검색')
+                              .setDescription('')
+                              .addField(`${osu[0].username} 의 Mania 전적`, `레벨: ${osu[0].level}\n플레이 횟수: ${osu[0].playcount}\n플레이 시간: ${hour}시간 ${min}분 ${sec}초\n가입 날짜: ${osu[0].join_date}\n\n획득 점수: ${osu[0].total_score}\n랭킹: ${osu[0].pp_rank}\n국가 랭킹: ${osu[0].pp_country_rank}\npp: ${osu[0].pp_raw}\n정확도: ${osu[0].accuracy}\n` ,false)
+                            )
+                            }
+                            else {
+                              message.channel.send(new Discord.MessageEmbed()
+                              .setColor('#de0b43')
+                              .setTitle('osu! 전적 검색')
+                              .setDescription('')
+                              .addField(':exclamation:  에러 발생', '에러 코드 0x07: 모드 입력이 올바르지 않습니다. ```0 = std\n1 = taiko\n2 = catch\n3 = mania```', true)
+                            )
+                            }
+
                         }
                     }
                     else
-                        message.channel.send('서버에 문제가 생겼거나 존재하지 않는 운송장 번호야!');
+                      message.channel.send(new Discord.MessageEmbed()
+                      .setColor('#de0b43')
+                      .setTitle('osu! 전적 검색')
+                      .setDescription('')
+                      .addField(':exclamation:  에러 발생', '에러 코드 0x08: 서버 접속 오류!', true)
+                    )
                 });
             }
             break;
@@ -757,16 +903,47 @@ bot.on('message', message => {
                 request("https://codeup.kr/userinfo.php?user=" + args[1], (error, response, html) => {
                     if (!error && response.statusCode == 200) {
                         const $ = cheerio.load(html);
-                        var name = $(".d-inline > strong > a > span")[0].children[0].data;
-                        var cd_rank = $("body > main > div.container.mt-2 > div.row > div.col-md-12.col-lg-4 > table > tbody > tr:nth-child(1) > td.text-center")[0].children[0].data.replace(/ /g, " ");
-                        //rank = rank.replace(/ /g,"\n");
-                        var solved = $(".text-center > a")[0].children[0].data;
-                        var submit = $(".text-center > a")[1].children[0].data;
-                        var solved = $("body > main > div.container.mt-2 > div.row > div.col-md-12.col-lg-4 > table > tbody > tr:nth-child(4) > td:nth-child(2) > a")[0].children[0].data;
-
-                        message.channel.send(`${name} 의 전적\n순위: ${cd_rank}\n푼 문제 수: ${solved}\n제출 횟수: ${submit}\n정확한 풀이: ${solved}`);
-                    }
-                });
+                        try { var name = $(".d-inline > strong > a > span")[0].children[0].data; } catch(e) { }
+                        try { var cd_rank = $("body > main > div.container.mt-2 > div.row > div.col-md-12.col-lg-4 > table > tbody > tr:nth-child(1) > td.text-center")[0].children[0].data.replace(/ /g, "\n"); } catch (e) { }
+                        try { cd_rank = cd_rank.trim(); } catch (e) { }
+                        console.log(cd_rank);
+                        try { var solved = $(".text-center > a")[0].children[0].data; }
+                        catch (e) { }
+                        try { var submit = $(".text-center > a")[1].children[0].data; } catch(e) { }
+                        try { var correct = $("body > main > div.container.mt-2 > div.row > div.col-md-12.col-lg-4 > table > tbody > tr:nth-child(4) > td:nth-child(2) > a")[0].children[0].data; } catch (e) { }
+                        finally {
+                          if (submit !== undefined && correct !== undefined){
+                            message.channel.send(new Discord.MessageEmbed()
+                            .setColor('#4fe8a3')
+                            .setTitle('CodeUp 전적 검색')
+                            .setDescription('')
+                            .addField(`${name} 의 CodeUp 전적`, `순위: ${cd_rank}\n푼 문제 수: ${solved}\n제출 횟수: ${submit}\n정확한 풀이: ${correct}` ,false)
+                          )
+                          }
+                          else if ($("body > main > div")[0].children[0].data.trim() == '그런 사용자는 없습니다!'){
+                            message.channel.send(new Discord.MessageEmbed()
+                            .setColor('#de0b43')
+                            .setTitle('CodeUp 전적 검색')
+                            .setDescription('')
+                            .addField(':exclamation:  에러 발생', '에러 코드 0x06: 존재하지 않는 닉네임!', true)
+                            )
+                          }
+                          else {
+                            try {
+                              if ($("body > main > div.container.mt-2 > blockquote > footer > span")[0].children[0].data.trim() == '탈퇴한 회원'){
+                                message.channel.send(new Discord.MessageEmbed()
+                                .setColor('#de0b43')
+                                .setTitle('CodeUp 전적 검색')
+                                .setDescription('')
+                                .addField(':exclamation:  에러 발생', '에러 코드 0x09: 탈퇴한 회원입니다!', true)
+                                )
+                              }
+                            }
+                            catch(e) {}
+                          }
+                      }
+                }
+              });
             }
             break;
         case 'github':
@@ -785,7 +962,29 @@ bot.on('message', message => {
             request(options, function (error, response) {
                 if (error) throw new Error(error);{
                   const data = JSON.parse(response.body);
-                  message.channel.send(`${data.name}\n소개: ${data.bio}\n소속: ${data.company}\n웹페이지: <${data.blog}>\n위치: ${data.location}\n코딩노예가 될 준비: ${data.hireable}`);
+                  if (data.name != null){
+                    if (data.hireable == true){
+                      var hireable_emoji = ':regional_indicator_o:';
+                    }
+                    else {
+                      var hireable_emoji = ':regional_indicator_x:';
+                    }
+                    data.bio = data.bio.trim();
+                    message.channel.send(new Discord.MessageEmbed()
+                    .setColor('#4fe8a3')
+                    .setTitle('Github 사용자 검색')
+                    .setDescription('')
+                    .addField(`${data.name} 의 정보`, `소개: ${data.bio}\n소속: ${data.company}\n웹페이지: ${data.blog}\n위치: ${data.location}\n코딩노예가 될 준비: ${hireable_emoji}` ,false)
+                    )
+                  }
+                  else {
+                    message.channel.send(new Discord.MessageEmbed()
+                    .setColor('#de0b43')
+                    .setTitle('Github 사용자 검색')
+                    .setDescription('')
+                    .addField(':exclamation:  에러 발생', '에러 코드 0x06: 존재하지 않는 닉네임!', true)
+                    )
+                  }
                 }
             });
           }
