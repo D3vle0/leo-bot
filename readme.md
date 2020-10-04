@@ -1,5 +1,5 @@
 # 리오봇
-구글 플레이 개발자 Devleo의 첫번째 디스코드 봇!
+Devleo의 첫번째 디스코드 봇!
 (node.js, discord.js)
 
 ---
