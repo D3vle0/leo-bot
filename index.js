@@ -1067,7 +1067,7 @@ bot.on('message', message => {
                     else {
                       var hireable_emoji = ':regional_indicator_x:';
                     }
-                    data.bio = data.bio.trim();
+                    try { data.bio = data.bio.trim(); } catch (e) { }
                     message.channel.send(new Discord.MessageEmbed()
                     .setColor('#4fe8a3')
                     .setTitle('Github 사용자 검색')
