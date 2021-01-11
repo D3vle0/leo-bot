@@ -763,7 +763,7 @@ bot.on('message', message => {
                                   .setColor('#4fe8a3')
                                   .setTitle('디미고 급식')
                                   .setDescription('')
-                                  .addField(`${meal_month}월 ${meal_day}일 아침 메뉴`, `${repl}` ,false)
+                                  .addField(`${meal_month}월 ${meal_day}일 점심 메뉴`, `${repl}` ,false)
                                 )
                                 }
                                 else {
@@ -798,7 +798,7 @@ bot.on('message', message => {
                                   .setColor('#4fe8a3')
                                   .setTitle('디미고 급식')
                                   .setDescription('')
-                                  .addField(`${meal_month}월 ${meal_day}일 아침 메뉴`, `${repl}` ,false)
+                                  .addField(`${meal_month}월 ${meal_day}일 저녁 메뉴`, `${repl}` ,false)
                                 )
                                 }
                                 else{
