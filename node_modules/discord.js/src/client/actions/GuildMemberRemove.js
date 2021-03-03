@@ -9,7 +9,7 @@ class GuildMemberRemoveAction extends Action {
     const guild = client.guilds.cache.get(data.guild_id);
     let member = null;
     if (guild) {
-      member = this.getMember({ user: data.user }, guild);
+      member = this.getMember(data, guild);
       guild.memberCount--;
       if (member) {
         member.deleted = true;

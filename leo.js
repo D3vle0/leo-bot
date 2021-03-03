@@ -508,7 +508,7 @@ bot.on('message', message => {
                     .addField('격리 해제','격리 해제: ' + $(".info_num")[2].children[0].data + '명', false)
                     .addField('검사 진행 중','검사 진행 중: ' + $(".info_num")[1].children[0].data + '명', false)
                     .addField('사망','사망: ' + $(".info_num")[3].children[0].data + '명', false)
-                    .addField('국내 치사율','국내 치사율: ' + no_comma2 / no_comma * 100 + '%', false)
+                    .addField('국내 치사율','국내 치사율: ' + (no_comma2 / no_comma * 100).toFixed(2) + '%', false)
                     message.channel.send(embed)
                 }
             });
